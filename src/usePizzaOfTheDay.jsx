@@ -6,10 +6,13 @@ export const usePizzaOfTheDay = () => {
   useEffect(() => {
     async function fetchPizzaOfTheDay() {
       // setloading(true);
-      await new  Promise((resolve) => { setTimeout(resolve, 2000) });
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
+      });
 
-
-      const response = await fetch("/api/pizza-of-the-day");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/pizza-of-the-day`
+      );
       const data = await response.json();
       setPizzaOfTheDay(data);
       // setloading(false);

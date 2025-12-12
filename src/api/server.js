@@ -79,47 +79,47 @@ server.get("/api/pizzas", async function getPizzas(request, reply) {
   return reply.code(200).send(responsePizzas);
 });
 
-server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(
-  request,
-  reply
-) {
-  const pizzas = await db.all(
-    `SELECT 
+server.get(
+  "/api/pizza-of-the-day",
+  async function getPizzaOfTheDay(request, reply) {
+    const pizzas = await db.all(
+      `SELECT 
       pizza_type_id as id, name, category, ingredients as description
     FROM 
       pizza_types`
-  );
+    );
 
-  const daysSinceEpoch = Math.floor(Date.now() / 86400000);
-  const pizzaIndex = daysSinceEpoch % pizzas.length;
-  const pizza = pizzas[pizzaIndex];
+    const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+    const pizzaIndex = daysSinceEpoch % pizzas.length;
+    const pizza = pizzas[pizzaIndex];
 
-  const sizes = await db.all(
-    `SELECT
+    const sizes = await db.all(
+      `SELECT
       size, price
     FROM
       pizzas
     WHERE
       pizza_type_id = ?`,
-    [pizza.id]
-  );
+      [pizza.id]
+    );
 
-  const sizeObj = sizes.reduce((acc, current) => {
-    acc[current.size] = +current.price;
-    return acc;
-  }, {});
+    const sizeObj = sizes.reduce((acc, current) => {
+      acc[current.size] = +current.price;
+      return acc;
+    }, {});
 
-  const responsePizza = {
-    id: pizza.id,
-    name: pizza.name,
-    category: pizza.category,
-    description: pizza.description,
-    image: `/pizzas/${pizza.id}.webp`,
-    sizes: sizeObj,
-  };
+    const responsePizza = {
+      id: pizza.id,
+      name: pizza.name,
+      category: pizza.category,
+      description: pizza.description,
+      image: `/pizzas/${pizza.id}.webp`,
+      sizes: sizeObj,
+    };
 
-  return reply.code(200).send(responsePizza);
-});
+    return reply.code(200).send(responsePizza);
+  }
+);
 
 server.get("/api/orders", async function getOrders(request, reply) {
   const id = request.query.id;
@@ -151,7 +151,10 @@ server.get("/api/order", async function getOrders(request, reply) {
     [id]
   );
 
-  const [order, orderItemsRes] = await Promise.all([orderPromise, orderItemsPromise]);
+  const [order, orderItemsRes] = await Promise.all([
+    orderPromise,
+    orderItemsPromise,
+  ]);
 
   const orderItems = orderItemsRes.map((item) =>
     Object.assign({}, item, {
@@ -240,21 +243,23 @@ server.get("/api/past-orders", async function getPastOrders(request, reply) {
   }
 });
 
-server.get("/api/past-order/:order_id", async function getPastOrder(request, reply) {
-  const orderId = request.params.order_id;
+server.get(
+  "/api/past-order/:order_id",
+  async function getPastOrder(request, reply) {
+    const orderId = request.params.order_id;
 
-  try {
-    const order = await db.get(
-      "SELECT order_id, date, time FROM orders WHERE order_id = ?",
-      [orderId]
-    );
+    try {
+      const order = await db.get(
+        "SELECT order_id, date, time FROM orders WHERE order_id = ?",
+        [orderId]
+      );
 
-    if (!order) {
-      return reply.code(404).send({ error: "Order not found" });
-    }
+      if (!order) {
+        return reply.code(404).send({ error: "Order not found" });
+      }
 
-    const orderItems = await db.all(
-      `SELECT 
+      const orderItems = await db.all(
+        `SELECT 
         t.pizza_type_id as pizzaTypeId, t.name, t.category, t.ingredients as description, o.quantity, p.price, o.quantity * p.price as total, p.size
       FROM 
         order_details o
@@ -268,28 +273,32 @@ server.get("/api/past-order/:order_id", async function getPastOrder(request, rep
         p.pizza_type_id = t.pizza_type_id
       WHERE 
         order_id = ?`,
-      [orderId]
-    );
+        [orderId]
+      );
 
-    const formattedOrderItems = orderItems.map((item) =>
-      Object.assign({}, item, {
-        image: `/pizzas/${item.pizzaTypeId}.webp`,
-        quantity: +item.quantity,
-        price: +item.price,
-      })
-    );
+      const formattedOrderItems = orderItems.map((item) =>
+        Object.assign({}, item, {
+          image: `/pizzas/${item.pizzaTypeId}.webp`,
+          quantity: +item.quantity,
+          price: +item.price,
+        })
+      );
 
-    const total = formattedOrderItems.reduce((acc, item) => acc + item.total, 0);
+      const total = formattedOrderItems.reduce(
+        (acc, item) => acc + item.total,
+        0
+      );
 
-    return reply.code(200).send({
-      order: Object.assign({ total }, order),
-      orderItems: formattedOrderItems,
-    });
-  } catch (error) {
-    request.log.error(error);
-    return reply.code(500).send({ error: "Failed to fetch order" });
+      return reply.code(200).send({
+        order: Object.assign({ total }, order),
+        orderItems: formattedOrderItems,
+      });
+    } catch (error) {
+      request.log.error(error);
+      return reply.code(500).send({ error: "Failed to fetch order" });
+    }
   }
-});
+);
 
 server.post("/api/contact", async function contactForm(request, reply) {
   const { name, email, message } = request.body;

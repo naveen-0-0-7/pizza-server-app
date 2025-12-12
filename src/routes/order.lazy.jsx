@@ -3,6 +3,7 @@ import Cart from "../Cart";
 import Pizza from "../Pizza";
 import { CartContext } from "../Context";
 import { createLazyFileRoute } from "@tanstack/react-router";
+
 // feel free to change en-US / USD to your locale
 const intl = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -20,20 +21,16 @@ function Order() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useContext(CartContext);
 
-  // this is used to send the post request to API to post the
-  // new order that we are about to make
-
+  // POST new order
   async function checkout() {
     setLoading(true);
 
-    await fetch("/api/order", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/order`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        cart,
-      }),
+      body: JSON.stringify({ cart }),
     });
 
     setCart([]);
@@ -52,8 +49,12 @@ function Order() {
     fetchPizzaTypes();
   }, []);
 
+  // ❌ WRONG BEFORE
+  // "`${import.meta.env.VITE_API_URL}/api/pizzas"
+
+  // ✅ FIXED VERSION
   async function fetchPizzaTypes() {
-    const pizzasRes = await fetch("/api/pizzas");
+    const pizzasRes = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
     const pizzasJson = await pizzasRes.json();
     setPizzaTypes(pizzasJson);
     setLoading(false);
@@ -83,6 +84,7 @@ function Order() {
                 ))}
               </select>
             </div>
+
             <div>
               <label htmlFor="pizza-size">Pizza Size</label>
               <div>
@@ -121,8 +123,10 @@ function Order() {
                 </span>
               </div>
             </div>
+
             <button type="submit">Add to Cart</button>
           </div>
+
           {loading ? (
             <h3>LOADING …</h3>
           ) : (
@@ -137,6 +141,7 @@ function Order() {
           )}
         </form>
       </div>
+
       {loading ? <h2>LOADING …</h2> : <Cart checkout={checkout} cart={cart} />}
     </div>
   );

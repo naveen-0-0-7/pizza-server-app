@@ -10,9 +10,11 @@ export const Route = createLazyFileRoute("/past")({
 });
 
 function ErrorBoundaryWrappedPastOrderRoutes(props) {
- return ( <ErrorBoundary>
-    <PastOrdersRoute  {...props}/>
-  </ErrorBoundary>);
+  return (
+    <ErrorBoundary>
+      <PastOrdersRoute {...props} />
+    </ErrorBoundary>
+  );
 }
 
 function PastOrdersRoute() {
@@ -26,12 +28,11 @@ function PastOrdersRoute() {
     staleTime: 30000,
   });
 
-
   const { isLoading: isLoadingPastOrder, data: pastOrderData } = useQuery({
     queryKey: ["past-order", focusedOrder],
     queryFn: () => getPastOrder(focusedOrder),
     enabled: !!focusedOrder,
-    staleTime: 24 * 60 * 60 * 1000, 
+    staleTime: 24 * 60 * 60 * 1000,
   });
 
   function sNo(page, index) {

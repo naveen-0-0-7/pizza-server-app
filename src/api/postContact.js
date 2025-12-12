@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const postContact = async (name, email, message) => {
-  const res = await fetch("/api/contact", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,11 +18,14 @@ const postContact = async (name, email, message) => {
 };
 
 const PostContact = async (name, email, message) => {
-  const response = await axios.post("/api/contact", {
-    name,
-    email,
-    message,
-  });
+  const response = await axios.post(
+    `${import.meta.env.VITE_API_URL}/api/contact`,
+    {
+      name,
+      email,
+      message,
+    }
+  );
 
   return response.data;
 };

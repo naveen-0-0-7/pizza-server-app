@@ -9,7 +9,7 @@ export const Route = createLazyFileRoute("/contact")({
 function ContactRoute() {
   const mutation = useMutation({
     mutationFn: function (inputFormData) {
-      return postContact(
+      return PostContact(
         inputFormData.get("name"),
         inputFormData.get("email"),
         inputFormData.get("message")
