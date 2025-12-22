@@ -4,7 +4,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./ErrorBoundary";
-//PREPERTIES:
+//PROPERTIES:
 const router = createRouter({ routeTree });
 const queryClient = new QueryClient();
 
